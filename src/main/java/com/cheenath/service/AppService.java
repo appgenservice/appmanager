@@ -5,13 +5,12 @@ import com.cheenath.data.AppDetails;
 import com.cheenath.data.AppRepository;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -23,14 +22,17 @@ public class AppService {
     private RestTemplate restTemplate;
     @Autowired
     private AppRepository appRepository;
-//APP_GIT_REPO_URL=https://appgenservice:Jasilin1@github.com/appgenservice/${APP_DIR}.git
-    private String jenkinsURL = "http://www.appgenservice.com:8080/job/deploy_java_app/buildWithParameters?APP_GIT_REPO_URL=%s&GIT_BRANCH=%s&APP_ID=%d&APP_NAME=%s&DB_NAME=%s&DB_USER=%s&DB_PASSWORD=%s&PORT=%d";
 
-    UriComponents uriComponents = UriComponentsBuilder.fromUriString(jenkinsURL).build();
+    //@Value("${jenkins.url.value}")
+    private String jenkinsURL = "http://www.myvotes.in:8080/job/deploy_java_app/buildWithParameters?APP_GIT_REPO_URL=%s&GIT_BRANCH=%s&APP_ID=%d&APP_NAME=%s&DB_NAME=%s&DB_USER=%s&DB_PASSWORD=%s&PORT=%d";
+    //private String jenkinsURL = "http://www.appgenservice.com:8080/job/deploy_java_app/buildWithParameters?APP_GIT_REPO_URL=%s&GIT_BRANCH=%s&APP_ID=%d&APP_NAME=%s&DB_NAME=%s&DB_USER=%s&DB_PASSWORD=%s&PORT=%d";
+
+//    UriComponents uriComponents = UriComponentsBuilder.fromUriString(jenkinsURL).build();
     public void deploy(Integer appId) throws AppManagementException {
 
         AppDetails appDetails = appRepository.findById(appId).orElseThrow(() -> new AppManagementException(String.format("App id %d not found", appId)));
-        String url = String.format(jenkinsURL, appDetails.getUrl(),appDetails.getBranch(), appDetails.getId(), appDetails.getAppName(), appDetails.getDbName(), appDetails.getDbUser(), appDetails.getDbPassword(), appDetails.getPort());
+        String url = String.format(jenkinsURL.trim(), appDetails.getUrl(),appDetails.getBranch(), appDetails.getId(), appDetails.getAppName(), appDetails.getDbName(), appDetails.getDbUser(), appDetails.getDbPassword(), appDetails.getPort());
+        System.out.println(jenkinsURL +"\n"+url);
         HttpHeaders headers = new HttpHeaders(){{
             String auth = "admin:1189efce18589fad059d8e51342c7d9775";
             byte[] encodedAuth = Base64.encodeBase64(
